@@ -1,11 +1,16 @@
 import json
 import subprocess
+import sys
 import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-ADB = 'C:/Users/saim2/AppData/Local/Android/Sdk/platform-tools/adb.exe'
-DEVICE = '192.168.1.172:5555'
+sys.path.insert(0, str(ROOT.parent / 'scripts'))
+
+from tank_serial import adb_binary, resolve_serial
+
+ADB = adb_binary()
+DEVICE = resolve_serial()
 
 
 def adb(*args):

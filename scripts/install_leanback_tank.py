@@ -6,10 +6,12 @@ import subprocess
 import sys
 import time
 
+from tank_serial import adb_binary, resolve_serial
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'analysis/launchers'
-ADB = r'C:/Users/saim2/AppData/Local/Android/Sdk/platform-tools/adb.exe'
-SERIAL = 'G070L81694972B80'
+ADB = adb_binary()
+SERIAL = resolve_serial()
 PKG = 'com.amazon.tv.leanbacklauncher'
 
 def adb(*args, timeout=30, binary=False):

@@ -8,9 +8,11 @@ import shutil
 import sqlite3
 import subprocess
 
+from tank_serial import resolve_serial
+
 root = Path(__file__).resolve().parents[1]
 run_dir = root / 'analysis/amonet-live-20261025-154149'
-serial = 'G070L81694972B80'
+serial = resolve_serial()
 
 def adb(*arguments, timeout=30):
     result = subprocess.run(['adb','-s',serial,*arguments], capture_output=True, timeout=timeout)

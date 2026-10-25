@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-AUDIT = Path(r"E:\Tools\FireStick")
+AUDIT = Path(__file__).resolve().parents[1]
 VENDOR = AUDIT / "kernel-src"
 V54 = AUDIT / "upstream" / "linux-3.10.54"
 V108 = AUDIT / "upstream" / "linux-3.10.108"

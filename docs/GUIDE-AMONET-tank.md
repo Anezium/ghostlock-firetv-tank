@@ -7,7 +7,7 @@
 > Les anciennes formulations « sans danger » et « débrickable par construction »
 > étaient trop affirmatives et ne constituent pas des garanties matérielles.
 
-Appareil : AFTT, Fire OS 5.2.9.5 (688805020), noyau 3.10.54+ · Serial `G070L81694972B80` (probablement 2018 → bootrom probablement OK)
+Appareil : AFTT, Fire OS 5.2.9.5 (688805020), noyau 3.10.54+ · Serial `<ton-serial>` (voir `adb devices`; probablement 2018 → bootrom probablement OK)
 
 **Test décisif en 10 min** : le stick est-il débloquable ? → étapes §4–5.
 Si le bootrom n'apparaît pas (matériel post-déc-2019), on arrête là, sans aucun risque.
@@ -18,8 +18,8 @@ Si le bootrom n'apparaît pas (matériel post-déc-2019), on arrête là, sans a
 
 | Élément | Emplacement / version |
 |---|---|
-| Kit Amonet v1.2.2 (scripts + twrp.img + tz.img + lk.bin + preloader) | `E:\Tools\FireStick\amonet\tank-convert\amonet-tank-v1.2.2\amonet\` |
-| Magisk v23.0 (dernier compatible Android 5.x) | `E:\Tools\FireStick\amonet\magisk\Magisk-v23.0.apk` |
+| Kit Amonet v1.2.2 (scripts + twrp.img + tz.img + lk.bin + preloader) | `amonet/tank-convert/amonet-tank-v1.2.2/amonet/` |
+| Magisk v23.0 (dernier compatible Android 5.x) | `amonet/magisk/Magisk-v23.0.apk` |
 | WSL2 `Ubuntu_24_04` | python3 + pyserial 3.5 + adb + fastboot 34.0.4 |
 | usbipd-win | 5.3.0 (`C:\Program Files\usbipd-win\usbipd.exe`) |
 | ADB Windows | platform-tools 37.0.0 (déjà utilisé pour l'audit) |
@@ -112,8 +112,8 @@ Il doit afficher `Waiting for bootrom`. **Le laisser tourner.**
 Le stick est repassé en mode fastboot — il apparaît côté Windows comme périphérique USB fastboot. On n'a **plus besoin d'usbipd**, le fastboot Windows suffit :
 
 ```powershell
-cd E:\Tools\FireStick\amonet\tank-convert\amonet-tank-v1.2.2\amonet
-$fb = "C:\Users\saim2\AppData\Local\Android\Sdk\platform-tools\fastboot.exe"
+cd amonet\tank-convert\amonet-tank-v1.2.2\amonet
+$fb = if ($env:FASTBOOT) { $env:FASTBOOT } else { 'fastboot' }
 & $fb devices                                   # doit lister le stick
 & $fb flash recovery bin\twrp.img
 & $fb flash TEE2 bin\tz.img
@@ -134,7 +134,7 @@ TWRP est pilotable depuis le PC (`adb devices` doit le voir).
    ```
 2. Le récupérer sur le PC :
    ```powershell
-   adb pull /sdcard/TWRP/BACKUPS/ E:\Tools\FireStick\backup-tank\
+   adb pull /sdcard/TWRP/BACKUPS/ backup-tank\
    ```
 3. (Après récupération, on pourra supprimer le backup du stick pour libérer la place.)
 
@@ -143,7 +143,7 @@ TWRP est pilotable depuis le PC (`adb devices` doit le voir).
 ## 8. Flash Magisk
 
 ```powershell
-adb push E:\Tools\FireStick\amonet\magisk\Magisk-v23.0.apk /sdcard/
+adb push amonet\magisk\Magisk-v23.0.apk /sdcard/
 adb shell twrp install /sdcard/Magisk-v23.0.apk
 adb reboot
 ```
@@ -182,5 +182,5 @@ La liste exacte sera générée sur l'appareil au moment venu :
 ## 11. Sources
 
 - Thread XDA officiel (guide k4y0z, photos des points, vidéo de démontage) : https://xdaforums.com/t/unlock-root-twrp-unbrick-fire-tv-stick-2nd-gen-tank.3907002/
-- Code : https://github.com/chaosmaster/amonet (branche `mt8127-tank`) — copie locale : `E:\Tools\FireStick\amonet\amonet-mt8127-tank`
+- Code : https://github.com/chaosmaster/amonet (branche `mt8127-tank`) — copie locale : `amonet/amonet-mt8127-tank`
 - Package v1.2.2 inclus dans : https://github.com/kerta1n/tank-convert (option LineageOS 12.1 = débloat ultime, à envisager APRÈS un backup complet)

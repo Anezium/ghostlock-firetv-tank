@@ -2,15 +2,17 @@
 import subprocess
 import time
 
-serial = 'G070L81694972B80'
+from tank_serial import fastboot_binary, resolve_serial
+
+serial = resolve_serial(tool='fastboot')
 deadline = time.monotonic() + 180
 print('WAITING_FOR_FIRE_TV_FASTBOOT', flush=True)
 while time.monotonic() < deadline:
-    result = subprocess.run(['fastboot', 'devices'], capture_output=True, text=True, timeout=10)
+    result = subprocess.run([fastboot_binary(), 'devices'], capture_output=True, text=True, timeout=10)
     if any(line.split() and line.split()[0] == serial for line in result.stdout.splitlines()):
         print(f'FASTBOOT_SERIAL={serial}', flush=True)
         for variable in ('product', 'unlocked', 'secure'):
-            result = subprocess.run(['fastboot', '-s', serial, 'getvar', variable],
+            result = subprocess.run([fastboot_binary(), '-s', serial, 'getvar', variable],
                                     capture_output=True, text=True, timeout=15)
             print(result.stdout + result.stderr, flush=True)
         break

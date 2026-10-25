@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import subprocess
 
+from tank_serial import resolve_serial
+
 root = Path(__file__).resolve().parents[1]
 run_dir = root / 'analysis/amonet-live-20261025-154149'
 backup_dir = run_dir / 'recovery-backup'
@@ -17,7 +19,7 @@ for name, record in manifest.items():
 apk = root / 'amonet/magisk/Magisk-v23.0.apk'
 if hashlib.sha256(apk.read_bytes()).hexdigest() != '079bc3a7f67413cb12509d1b811958dd7e7c7fb593d3f0507954fea72077b524':
     raise SystemExit('Magisk asset hash changed')
-serial = 'G070L81694972B80'
+serial = resolve_serial()
 def adb(*args, timeout=60):
     result = subprocess.run(['adb','-s',serial,*args], capture_output=True, timeout=timeout)
     output = (result.stdout + result.stderr).decode('utf-8', errors='replace')

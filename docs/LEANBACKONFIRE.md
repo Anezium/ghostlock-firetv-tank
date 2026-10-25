@@ -6,7 +6,7 @@ après redémarrage. Les mentions de conservation intégrale ci-dessous décrive
 uniquement l'étape d'installation du launcher.
 
 APK officiel 1.63, installé le 25 octobre 2026 sur AFTT / tank,
-numéro de série G070L81694972B80, Fire OS 5 / Android 5.1.1.
+numéro de série `<ton-serial>`, Fire OS 5 / Android 5.1.1.
 
 Source : https://github.com/tsynik/LeanbackLauncher/releases/tag/v1.63
 
@@ -41,7 +41,7 @@ root supplémentaire n'a été accordé au launcher.
 Avec le Stick connecté à ce PC, exécuter :
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File E:/Tools/FireStick/scripts/RESTORE-AMAZON-HOME.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/RESTORE-AMAZON-HOME.ps1
 ```
 
 Le script réactive l'accueil Amazon et son starter, puis ouvre l'accueil Amazon.

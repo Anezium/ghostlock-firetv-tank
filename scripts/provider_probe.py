@@ -1,9 +1,11 @@
+import os
 import re
 import subprocess
 from pathlib import Path
 
-AAPT = r"C:\Users\saim2\AppData\Local\Android\Sdk\build-tools\30.0.3\aapt.exe"
-APKS = Path(r"E:\Tools\FireStick\apks")
+ROOT = Path(__file__).resolve().parents[1]
+AAPT = os.environ.get("AAPT", "aapt")
+APKS = Path(os.environ.get("APKS", ROOT / "apks"))
 
 ELEM = re.compile(r"^(\s*)E: ([\w.-]+)(?: \(line=\d+\))?\s*$")
 ATTR = re.compile(r"^\s*A: (?:http://schemas\.android\.com/apk/res/android:)?([\w:]+)\(0x[0-9a-f]+\)=(.*)$")

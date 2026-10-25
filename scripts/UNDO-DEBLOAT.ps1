@@ -1,4 +1,13 @@
-﻿$adb = 'C:/Users/saim2/AppData/Local/Android/Sdk/platform-tools/adb.exe'
+﻿param([string]$Serial = $env:TANK_SERIAL)
+
+$adb = if ($env:ADB) { $env:ADB } else { 'adb' }
+if (-not $Serial) {
+    $Serial = (& $adb devices) |
+        Select-String '^\S+\s+device$' |
+        ForEach-Object { ($_.Line -split '\s+')[0] } |
+        Select-Object -First 1
+}
+if (-not $Serial) { throw 'Pass -Serial or set TANK_SERIAL (see: adb devices)' }
 $packages = @(
     # Les mises a jour OTA restent bloquees pour proteger l'installation root.
     'com.amazon.bueller.photos',
@@ -9,5 +18,5 @@ $packages = @(
     'com.amazon.kor.demo'
 )
 foreach ($package in $packages) {
-    & $adb -s G070L81694972B80 shell "su -c 'pm enable --user 0 $package'"
+    & $adb -s $Serial shell "su -c 'pm enable --user 0 $package'"
 }

@@ -3,9 +3,11 @@ import json
 from pathlib import Path
 import subprocess
 
+from tank_serial import resolve_serial
+
 root = Path(__file__).resolve().parents[1]
 run_dir = root / 'analysis/amonet-live-20261025-154149'
-serial = 'G070L81694972B80'
+serial = resolve_serial()
 targets = {
     'com.amazon.device.software.ota': 'OTA updater',
     'com.amazon.device.software.ota.override': 'OTA override',
@@ -76,7 +78,7 @@ report = {'changed': changed, 'skipped': skipped, 'disabled_after': sorted(disab
           'third_party_preserved': True, 'core_packages_preserved': True,
           'data_cleared': False, 'packages_uninstalled': False}
 (run_dir / 'debloat-result.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
-undo = ["$adb = 'C:/Users/saim2/AppData/Local/Android/Sdk/platform-tools/adb.exe'", "$packages = @("]
+undo = ["$adb = if ($env:ADB) { $env:ADB } else { 'adb' }", "$packages = @("]
 ota = {'com.amazon.device.software.ota', 'com.amazon.device.software.ota.override',
        'com.amazon.tv.forcedotaupdater.v2', 'com.amazon.tv.easyupgrade'}
 undo_apps = [package for package in changed if package not in ota]
@@ -84,6 +86,6 @@ undo.append('    # Les mises a jour OTA restent bloquees pour proteger le root.'
 undo.extend("    '" + package + "'" + (',' if index < len(undo_apps) - 1 else '')
             for index, package in enumerate(undo_apps))
 undo.extend([')', 'foreach ($package in $packages) {',
-             '    & $adb -s G070L81694972B80 shell "su -c \'pm enable --user 0 $package\'"', '}'])
+             f'    & $adb -s {serial} shell "su -c \'pm enable --user 0 $package\'"', '}'])
 (root / 'scripts/UNDO-DEBLOAT.ps1').write_text('\n'.join(undo) + '\n', encoding='utf-8-sig')
 print(json.dumps(report), flush=True)

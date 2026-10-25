@@ -6,11 +6,13 @@ import subprocess
 import sys
 import time
 
+from tank_serial import adb_binary, resolve_serial
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'analysis/app-cleanup-20261025'
 OUT.mkdir(exist_ok=True)
-ADB = 'C:/Users/saim2/AppData/Local/Android/Sdk/platform-tools/adb.exe'
-SERIAL = 'G070L81694972B80'
+ADB = adb_binary()
+SERIAL = resolve_serial()
 TARGETS = {
     'com.plexapp.android': 'Plex',
     'tv.molotov.app': 'Molotov',

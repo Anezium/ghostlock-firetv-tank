@@ -132,15 +132,45 @@ Measured on the reference unit:
 ```
 probes/         trigger, stack/canary probes, final exploit (gl_exploit.c), mutex probe
 scripts/        PC tooling: gl_bench.py (bench + crash black box), gl_root.py
-                (one-shot root CLI), find_misc_fops.py, debloat/backup helpers
+                (one-shot root CLI), tank_serial.py (serial resolution),
+                find_misc_fops.py, debloat/backup helpers
 docs/           plan, offsets, measurements, guides
 source-subset/  the few GPL kernel sources that matter (rtmutex.c, futex.c,
                 tank_defconfig)
 ```
 
-Not in the repository: the vendor kernel image, the full vendor source tree and
-run logs (see `.gitignore`). Fetch them locally with `scripts/fetch_boot.py`
-and `scripts/fetch_sources.py`.
+The legacy lab helpers (`debloat_tank.py`, `amonet_*`, …) no longer hardcode a
+serial: they take `$TANK_SERIAL` (or auto-detect the only `tank` device), and
+`$ADB` / `$FASTBOOT` override the binary paths.
+
+## Getting the vendor assets
+
+The repository does not ship Amazon's kernel image, the vendor source tree nor
+run logs (see `.gitignore`). To regenerate them locally:
+
+```bash
+python scripts/fetch_boot.py
+# firmware/boot-688805020.img, kernel-688805020.zimage, kernel-688805020.raw
+
+pip install vmlinux-to-elf        # or: uv tool install vmlinux-to-elf
+vmlinux-to-elf firmware/kernel-688805020.raw firmware/kernel-688805020.elf
+
+python scripts/fetch_sources.py           # index page + tarball URL only
+python scripts/fetch_sources.py --scan    # also stream and extract the sources
+```
+
+`fetch_boot.py` reads the public OTA with HTTP range requests, so it transfers a
+few MB instead of the whole ~600 MB file; it decompresses the XZ kernel payload
+and checks the `3.10.54+` banner. `vmlinux-to-elf` turns that raw kernel into an
+analysable ELF (it also accepts the `.zimage` directly). The curated sources
+that the offset work relies on are committed in `source-subset/`.
+
+`find_misc_fops.py` parses the ELF program headers (no hardcoded layout), so it
+works on a freshly rebuilt ELF too:
+
+```bash
+python scripts/find_misc_fops.py ashmem --kernel firmware/kernel-688805020.elf
+```
 
 ## Safety
 

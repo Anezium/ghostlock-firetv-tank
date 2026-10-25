@@ -1,6 +1,15 @@
+param([string]$Serial = $env:TANK_SERIAL)
+
 $ErrorActionPreference = 'Stop'
-$adbPath = 'C:/Users/saim2/AppData/Local/Android/Sdk/platform-tools/adb.exe'
-$stickSerial = 'G070L81694972B80'
+$adbPath = if ($env:ADB) { $env:ADB } else { 'adb' }
+if (-not $Serial) {
+    $Serial = (& $adbPath devices) |
+        Select-String '^\S+\s+device$' |
+        ForEach-Object { ($_.Line -split '\s+')[0] } |
+        Select-Object -First 1
+}
+if (-not $Serial) { throw 'Pass -Serial or set TANK_SERIAL (see: adb devices)' }
+$stickSerial = $Serial
 foreach ($component in @(
     'com.amazon.tv.launcher',
     'com.amazon.tv.launcher/.ui.HomeActivity_vNext',

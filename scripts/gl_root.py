@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """GhostLock one-shot root CLI for the Fire TV Stick 2 (AFTT, "tank").
 
-    python scripts/gl_root.py --serial 192.168.1.172:5555 --cmd "id"
+    python scripts/gl_root.py --serial <serial> --cmd "id"
 
 The tool is a thin PC-side wrapper around probes/gl_exploit:
 

@@ -43,16 +43,17 @@ soit 716 402 688 octets supplémentaires disponibles (environ 716 Mo).
 
 ## Utiliser ADB depuis le PC
 
-Le SDK installé sur le PC fournit ADB à cet emplacement :
-`C:/Users/saim2/AppData/Local/Android/Sdk/platform-tools/adb.exe`.
-Toujours cibler ce Stick avec `-s G070L81694972B80`, car il peut aussi apparaître
-en Wi-Fi ou d'autres appareils Android peuvent être connectés.
+Le SDK installé sur le PC fournit ADB ; s'il n'est pas dans le `PATH`, pointe-le
+avec `$env:ADB`. Cible toujours ce Stick avec `-s $serial`, car il peut aussi
+apparaître en Wi-Fi ou d'autres appareils Android peuvent être connectés.
 
 ```powershell
-$adbPath = 'C:/Users/saim2/AppData/Local/Android/Sdk/platform-tools/adb.exe'
-& $adbPath -s G070L81694972B80 install -r 'C:/chemin/application.apk'
-& $adbPath -s G070L81694972B80 push 'C:/chemin/fichier.mp4' /sdcard/Download/
-& $adbPath -s G070L81694972B80 pull /sdcard/Download/fichier.mp4 'C:/chemin/'
+$adbPath = if ($env:ADB) { $env:ADB } else { 'adb' }
+& $adbPath devices                       # relever le numéro de série du Stick
+$serial = $env:TANK_SERIAL                # ou le passer en dur / en argument
+& $adbPath -s $serial install -r 'C:/chemin/application.apk'
+& $adbPath -s $serial push 'C:/chemin/fichier.mp4' /sdcard/Download/
+& $adbPath -s $serial pull /sdcard/Download/fichier.mp4 'C:/chemin/'
 ```
 
 ADB remplace ces deux outils pour les opérations depuis un ordinateur connecté.

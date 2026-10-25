@@ -4,9 +4,11 @@ from pathlib import Path
 import subprocess
 import time
 
+from tank_serial import resolve_serial
+
 root = Path(__file__).resolve().parents[1]
 run_dir = root / 'analysis/amonet-live-20261025-154149'
-serial = 'G070L81694972B80'
+serial = resolve_serial()
 def adb(*args, timeout=20):
     result = subprocess.run(['adb','-s',serial,*args], capture_output=True, timeout=timeout)
     output = (result.stdout + result.stderr).decode('utf-8', errors='replace').strip()

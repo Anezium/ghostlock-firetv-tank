@@ -20,8 +20,8 @@ publication d'un one-click.
 ## Utilisation
 
 ```
-python scripts/gl_bench.py --serial 192.168.1.172:5555 doctor
-python scripts/gl_root.py  --serial 192.168.1.172:5555 --cmd "id; getenforce"
+python scripts/gl_bench.py --serial <serial> doctor
+python scripts/gl_root.py  --serial <serial> --cmd "id; getenforce"
 ```
 
 `gl_root.py` :

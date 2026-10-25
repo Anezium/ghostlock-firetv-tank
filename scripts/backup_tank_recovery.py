@@ -5,10 +5,12 @@ from pathlib import Path
 import subprocess
 import time
 
+from tank_serial import resolve_serial
+
 root = Path(__file__).resolve().parents[1]
 destination = root / 'analysis/amonet-live-20261025-154149/recovery-backup'
 destination.mkdir(exist_ok=True)
-serial = 'G070L81694972B80'
+serial = resolve_serial()
 parts = json.loads((destination.parent / 'backup/partitions.json').read_text(encoding='utf-8'))
 base = '/dev/block/platform/mtk-msdc.0/by-name/'
 identity = subprocess.run(['adb','-s',serial,'shell','getprop','ro.product.device'],

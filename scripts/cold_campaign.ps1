@@ -1,9 +1,10 @@
 param(
-    [string]$Serial = '192.168.1.172:5555',
+    [string]$Serial = $env:TANK_SERIAL,
     [int]$Count = 8,
     [int]$Attempts = 3
 )
 $S = $Serial
+if (-not $S) { throw 'Pass -Serial or set TANK_SERIAL (see: adb devices)' }
 for ($i = 1; $i -le $Count; $i++) {
     adb -s $S reboot 2>&1 | Out-Null
     Start-Sleep -Seconds 8

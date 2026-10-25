@@ -1,12 +1,16 @@
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 
-ADB = r"C:\Users\saim2\AppData\Local\Android\Sdk\platform-tools\adb.exe"
-DEV = "192.168.1.172:5555"
-AAPT = r"C:\Users\saim2\AppData\Local\Android\Sdk\build-tools\30.0.3\aapt.exe"
-OUT = Path(r"E:\Tools\FireStick\apks")
+from tank_serial import adb_binary, resolve_serial
+
+ROOT = Path(__file__).resolve().parents[1]
+ADB = adb_binary()
+DEV = resolve_serial()
+AAPT = os.environ.get("AAPT", "aapt")
+OUT = Path(os.environ.get("APKS", ROOT / "apks"))
 
 PKGS = [
     "com.amazon.platform.fdrw", "com.amazon.ssmsys", "com.amazon.bueller.notification",
@@ -137,4 +141,5 @@ for pkg in PKGS:
 
 text = "\n".join(report)
 print(text)
-Path(r"E:\Tools\FireStick\analysis\exported-components.txt").write_text(text, encoding="utf-8")
+(ROOT / "analysis").mkdir(exist_ok=True)
+(ROOT / "analysis" / "exported-components.txt").write_text(text, encoding="utf-8")

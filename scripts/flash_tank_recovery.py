@@ -2,13 +2,15 @@
 from pathlib import Path
 import subprocess
 
+from tank_serial import fastboot_binary, resolve_serial
+
 root = Path(__file__).resolve().parents[1]
 package = root / 'amonet/tank-convert/amonet-tank-v1.2.2/amonet'
-serial = 'G070L81694972B80'
+serial = resolve_serial(tool='fastboot')
 log_file = root / 'analysis/tank-recovery-flash.log'
 
 def run(*arguments):
-    result = subprocess.run(['fastboot', '-s', serial, *map(str, arguments)],
+    result = subprocess.run([fastboot_binary(), '-s', serial, *map(str, arguments)],
                             capture_output=True, text=True, timeout=120)
     output = result.stdout + result.stderr
     print(output, flush=True)

@@ -1,6 +1,6 @@
 # Fire TV Stick 2 (AFTT / tank) — audit root & fluidité
 
-Date : 2026-10-25 · Appareil : `192.168.1.172:5555`
+Date : 2026-10-25 · Appareil : AFTT / tank, Fire OS 5.2.9.5 (`288.6.8.8_user_688805020`)
 Fire OS **5.2.9.5 (688805020)** · Android 5.1.1 · noyau **3.10.54+** (build 2024-03-13) · ARM 32 bits · SELinux **Enforcing** · patch déclaré `2022-00-01`
 
 ## 1. Accès
