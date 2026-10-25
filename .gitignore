@@ -1,0 +1,42 @@
+# Third-party / vendor trees: fetched locally, not redistributed here.
+# (No inline comments in .gitignore: everything after a pattern is part of it.)
+
+# hardware unlock toolchain, ~305 MB
+amonet/
+
+# Amazon GPL source drop, ~132 MB
+amazon-sources/
+
+# vendor kernel tree used for the offset work, ~55 MB
+kernel-src/
+
+# vanilla linux-3.10.108 tree, ~1.0 GB
+upstream/
+
+# helper tool, ~38 MB
+vmlinux-to-elf/
+
+# vendored python deps
+python-libs/
+
+# Vendor binaries and device dumps.
+firmware/
+apks/
+fdrw/
+
+# Run logs: last_kmsg, consoles, device state, ~1 GB
+analysis/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+# Local scratch
+*.log
+*.tmp

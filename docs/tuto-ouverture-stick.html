@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ouvrir le Fire TV Stick 2 (tank) — tuto visuel</title>
+<style>
+  body { font-family: var(--font-sans); color: var(--foreground); margin: 0; padding: 0 16px 32px; line-height: 1.5; }
+  .step { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 20px 14px; margin: 18px 0; }
+  .step h2 { margin: 0 0 4px; font-size: 19px; }
+  .step p.note { color: var(--muted-foreground); font-size: 13.5px; margin: 4px 0 12px; }
+  .badge { display: inline-block; background: var(--primary); color: var(--primary-foreground); border-radius: 999px; font-size: 13px; font-weight: 600; padding: 2px 10px; margin-right: 8px; vertical-align: 2px; }
+  .warn { background: var(--destructive-surface, color-mix(in srgb, var(--destructive) 12%, transparent)); border-left: 3px solid var(--destructive); border-radius: 6px; padding: 10px 14px; font-size: 13.5px; margin: 10px 0; }
+  .ok { background: var(--success, color-mix(in srgb, #22c55e 12%, transparent)); border-left: 3px solid var(--success, #22c55e); border-radius: 6px; padding: 10px 14px; font-size: 13.5px; margin: 10px 0; }
+  .tip { background: var(--accent-surface, color-mix(in srgb, var(--accent) 12%, transparent)); border-left: 3px solid var(--accent); border-radius: 6px; padding: 10px 14px; font-size: 13.5px; margin: 10px 0; }
+  svg { display: block; width: 100%; height: auto; margin: 8px auto 4px; }
+  .lbl { fill: var(--foreground); font-size: 13px; font-family: var(--font-sans); }
+  .lbl-s { fill: var(--muted-foreground); font-size: 11.5px; font-family: var(--font-sans); }
+  .lbl-b { fill: var(--foreground); font-size: 12.5px; font-weight: 700; font-family: var(--font-sans); }
+  .mono { font-family: var(--font-mono); font-size: 12px; }
+  a { color: var(--primary); }
+  .refs { font-size: 13px; color: var(--muted-foreground); }
+  code.k { background: var(--code-background); color: var(--code-foreground); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<p style="padding:16px;border:2px solid #e7a641;border-radius:8px"><strong>Guide préparatoire archivé.</strong> Le stick a depuis été débloqué et rooté. Ne pas utiliser les schémas reconstitués ou le comptage des résistances pour repérer CLK. Les anciennes mentions « sans danger » ne constituent pas une garantie. Consulter <a href="RESULTAT-ROOT-DEBLOAT.md">le résultat validé</a> avant une nouvelle intervention.</p>
+
+<!-- ================= ÉTAPE 0 : MATÉRIEL ================= -->
+<div class="step">
+  <h2><span class="badge">0</span>Matériel — tout se trouve chez toi</h2>
+  <p class="note">Coche ce que tu as trouvé. Rien d'exotique ici.</p>
+  <svg viewBox="0 0 690 150">
+    <!-- outils -->
+    <g>
+      <rect x="10" y="20" width="210" height="46" rx="8" fill="var(--secondary)" stroke="var(--border)"/>
+      <text x="22" y="40" class="lbl-b">1. Vieille carte bancaire</text>
+      <text x="22" y="56" class="lbl-s">pour ouvrir la coque plastique (clips)</text>
+      <rect x="240" y="20" width="200" height="46" rx="8" fill="var(--secondary)" stroke="var(--border)"/>
+      <text x="252" y="40" class="lbl-b">2. Couteau émoussé fin</text>
+      <text x="252" y="56" class="lbl-s">pour soulever le blindage métallique</text>
+      <rect x="460" y="20" width="220" height="46" rx="8" fill="var(--secondary)" stroke="var(--border)"/>
+      <text x="472" y="40" class="lbl-b">3. Un trombone</text>
+      <text x="472" y="56" class="lbl-s">pour le court-circuit (voir étape 5)</text>
+      <rect x="10" y="80" width="210" height="46" rx="8" fill="var(--secondary)" stroke="var(--border)"/>
+      <text x="22" y="100" class="lbl-b">4. Câble micro-USB données</text>
+      <text x="22" y="116" class="lbl-s">celui du chargeur Amazon convient</text>
+      <rect x="240" y="80" width="200" height="46" rx="8" fill="var(--secondary)" stroke="var(--border)"/>
+      <text x="252" y="100" class="lbl-b">5. PC + câble</text>
+      <text x="252" y="116" class="lbl-s">tout est déjà installé (WSL, usbipd)</text>
+      <rect x="460" y="80" width="220" height="46" rx="8" fill="var(--secondary)" stroke="var(--border)"/>
+      <text x="472" y="100" class="lbl-b">6. Optionnel : pince à linge</text>
+      <text x="472" y="116" class="lbl-s">astuce solo à l'étape 5 — pas obligatoire</text>
+    </g>
+  </svg>
+  <div class="tip">Avant de toucher la carte mère : <b>décharge-toi</b> — touche un radiateur métallique non peint quelques secondes. Évite siège à roulettes, polaire, frottements (électricité statique = ennemie des puces).</div>
+</div>
+
+<!-- ================= ÉTAPE 1 : ANATOMIE ================= -->
+<div class="step">
+  <h2><span class="badge">1</span>Anatomie du stick — repère le port micro-USB</h2>
+  <p class="note">Le stick se sort de la TV : l'HDMI ne sert à rien pendant l'opération. Le port micro-USB (celui du chargeur) devient notre port données + alimentation vers le PC.</p>
+  <svg viewBox="0 0 690 190">
+    <!-- corps du stick -->
+    <path d="M 90 70 L 560 70 Q 620 70 620 105 Q 620 140 560 140 L 90 140 Z" fill="var(--secondary)" stroke="var(--border)" stroke-width="2"/>
+    <!-- HDMI male -->
+    <path d="M 90 90 L 30 92 L 30 118 L 90 120 Z" fill="var(--muted)" stroke="var(--border)" stroke-width="2"/>
+    <text x="30" y="165" class="lbl-s">extrémité HDMI</text>
+    <text x="30" y="180" class="lbl-s">(reste dans le tiroir)</text>
+    <!-- port micro-USB sur le bord -->
+    <rect x="140" y="60" width="42" height="12" rx="3" fill="var(--primary)"/>
+    <line x1="161" y1="40" x2="161" y2="58" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrP)"/>
+    <text x="120" y="30" class="lbl-b" fill="var(--primary)">PORT MICRO-USB</text>
+    <text x="185" y="110" class="lbl-s">← c'est ICI qu'on branche le câble</text>
+    <text x="470" y="110" class="lbl-s">arrière arrondi →</text>
+    <defs>
+      <marker id="arrP" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--primary)"/></marker>
+    </defs>
+  </svg>
+  <div class="ok">Branche le câble micro-USB <b>sur le stick seulement</b>. Le bout USB-A attendra l'étape 5 pour entrer dans le PC.</div>
+</div>
+
+<!-- ================= ÉTAPE 2 : OUVERTURE COQUE ================= -->
+<div class="step">
+  <h2><span class="badge">2</span>Ouvrir la coque — la carte bancaire fait tout</h2>
+  <p class="note">Pas de vis : la coque est maintenue par des clips tout autour. Vue de côté, couture visible au milieu.</p>
+  <svg viewBox="0 0 690 210">
+    <!-- coque basse -->
+    <path d="M 70 130 L 590 130 Q 645 130 645 108 L 590 104 L 70 104 Z" fill="var(--secondary)" stroke="var(--border)" stroke-width="2"/>
+    <!-- coque haute relevée -->
+    <path d="M 70 104 L 590 104 Q 645 106 640 84 L 590 60 L 70 60 Z" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+    <text x="560" y="50" class="lbl-s">coque du haut</text>
+    <text x="560" y="150" class="lbl-s">coque du bas</text>
+    <!-- carte bancaire -->
+    <g transform="rotate(-18 300 110)">
+      <rect x="240" y="100" width="150" height="20" rx="3" fill="#1e66f5" opacity="0.9"/>
+      <rect x="248" y="105" width="34" height="10" rx="2" fill="#ffd66b"/>
+    </g>
+    <text x="230" y="185" class="lbl-b">carte bancaire plantée dans la couture →</text>
+    <!-- clips -->
+    <g stroke="var(--muted-foreground)" stroke-width="2">
+      <line x1="120" y1="98" x2="120" y2="110"/><line x1="200" y1="98" x2="200" y2="110"/>
+      <line x1="280" y1="98" x2="280" y2="110"/><line x1="360" y1="98" x2="360" y2="110"/>
+      <line x1="440" y1="98" x2="440" y2="110"/><line x1="520" y1="98" x2="520" y2="110"/>
+    </g>
+    <text x="105" y="90" class="lbl-s">clips (6-8 par côté)</text>
+  </svg>
+  <p class="note" style="margin-top:10px">
+    ① Enfonce le bord de la carte dans la couture du bord, <b>force doucement</b> jusqu'au « clic » d'un clip qui lâche.
+    ② Avance d'un cran, recommence. ③ Tourne autour des 4 côtés. Le premier clip est le plus dur — après, ça lâche vite.
+    ④ Les deux coques se séparent : extrais la carte mère.
+  </p>
+  <div class="warn"><b>Outils plastique uniquement</b> pour cette étape (carte, médiator, ongle). Un outil métallique qui dérape peut arracher un composant : c'est LA mort du stick. (Une résistance arrachée = stick mort, aucun artisanat possible.)</div>
+</div>
+
+<!-- ================= ÉTAPE 3 : BLINDAGE ================= -->
+<div class="step">
+  <h2><span class="badge">3</span>Soulever le blindage métallique (côté HDMI)</h2>
+  <p class="note">Vue de dessus de la carte mère. Le petit blindage posé (non soudé !) couvre les puces, côté HDMI.</p>
+  <svg viewBox="0 0 690 300">
+    <!-- PCB -->
+    <rect x="20" y="20" width="650" height="260" rx="10" fill="var(--secondary)" stroke="var(--border)" stroke-width="2"/>
+    <!-- connecteur HDMI (on le voit de face en bord) -->
+    <rect x="20" y="110" width="26" height="80" fill="var(--muted)" stroke="var(--border)"/>
+    <text x="30" y="205" class="lbl-s">HDMI</text>
+    <!-- pad noir -->
+    <rect x="70" y="130" width="46" height="40" rx="4" fill="#111" stroke="var(--border)"/>
+    <text x="60" y="250" class="lbl-s">pad noir</text>
+    <!-- blindage double rectangle -->
+    <g>
+      <rect x="160" y="70" width="230" height="150" rx="6" fill="var(--muted)" opacity="0.55" stroke="var(--foreground)" stroke-width="2" stroke-dasharray="0"/>
+      <rect x="160" y="70" width="120" height="150" rx="6" fill="none" stroke="var(--foreground)" stroke-width="2"/>
+      <text x="180" y="100" class="lbl-b">blindage posé</text>
+      <text x="180" y="118" class="lbl-s">(double rectangle)</text>
+      <text x="430" y="100" class="lbl-s">← sous lui :</text>
+      <text x="430" y="116" class="lbl-s">SoC MT8127 + eMMC (étape 4)</text>
+    </g>
+    <!-- points de levier -->
+    <g>
+      <line x1="120" y1="100" x2="160" y2="120" stroke="var(--warning, #eab308)" stroke-width="2" marker-end="url(#arrW)"/>
+      <line x1="120" y1="200" x2="160" y2="180" stroke="var(--warning, #eab308)" stroke-width="2" marker-end="url(#arrW)"/>
+      <text x="55" y="90" class="lbl-b" fill="var(--warning, #eab308)">insère la lame ICI</text>
+      <text x="60" y="230" class="lbl-b" fill="var(--warning, #eab308)">et ICI</text>
+      <text x="110" y="70" class="lbl-s">petits interstices au-dessus / en-dessous du pad noir</text>
+    </g>
+    <!-- sens de levage -->
+    <line x1="250" y1="245" x2="390" y2="245" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrP)"/>
+    <text x="252" y="265" class="lbl-s">fais le tour du blindage, soulève, dégage vers l'arrière</text>
+    <defs>
+      <marker id="arrW" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--warning, #eab308)"/></marker>
+      <marker id="arrP" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--primary)"/></marker>
+    </defs>
+  </svg>
+  <p class="note" style="margin-top:10px">
+    Glisse la lame (émoussée !) dans les interstices près du HDMI, soulève point par point tout autour du blindage.
+    Il se décolle vers l'arrière. Garde-le à portée de main.
+  </p>
+  <div class="warn"><b>Le cadre métallique soudé autour du blindage, TU LE LAISSES EN PLACE.</b> C'est lui notre masse (GND). Seul le capot posé se retire.</div>
+  <div class="tip">Un <b>pad thermique bleu</b> (pâte souple) relie le blindage aux puces : il reste collé soit au capot, soit aux puces. Arrache-le <b>délicatement</b> — il recouvre justement la rangée de résistances qu'on cherche. Vise le réassemblage avec (il refroidit le SoC).</div>
+</div>
+
+<!-- ================= ÉTAPE 4 : LE POINT CLK ================= -->
+<div class="step">
+  <h2><span class="badge">4</span>Sous le blindage : identifier CLK (4ᵉ résistance)</h2>
+  <p class="note">Zoom sur le coin de la puce MediaTek, une fois le pad thermique écarté. Rangée de petites résistances le long du bord de la puce.</p>
+  <svg viewBox="0 0 690 300">
+    <!-- rim métallique (GND) -->
+    <rect x="15" y="15" width="660" height="270" rx="8" fill="none" stroke="var(--muted-foreground)" stroke-width="10" opacity="0.45"/>
+    <text x="30" y="45" class="lbl-b">cadre métallique soudé = GND</text>
+    <!-- SoC -->
+    <rect x="420" y="60" width="150" height="150" fill="#1a1a1a" stroke="var(--foreground)" stroke-width="1.5"/>
+    <text x="445" y="130" class="lbl-b" fill="var(--foreground)">MT8127</text>
+    <text x="445" y="148" class="lbl-s">(puce MediaTek)</text>
+    <circle cx="425" cy="205" r="6" fill="var(--muted-foreground)"/>
+    <text x="405" y="212" class="lbl-s" text-anchor="end">coin repéré de la puce ●</text>
+    <!-- eMMC -->
+    <rect x="420" y="225" width="150" height="40" fill="#262626" stroke="var(--border)"/>
+    <text x="445" y="250" class="lbl-s">eMMC (mémoire)</text>
+    <!-- rangée de résistances -->
+    <g>
+      <rect x="130" y="196" width="16" height="10" fill="var(--muted-foreground)"/>
+      <rect x="180" y="196" width="16" height="10" fill="var(--muted-foreground)"/>
+      <rect x="230" y="196" width="16" height="10" fill="var(--muted-foreground)"/>
+      <rect x="280" y="196" width="16" height="10" fill="var(--success, #22c55e)"/>
+      <line x1="138" y1="215" x2="138" y2="240" stroke="var(--muted-foreground)" stroke-dasharray="3 3"/>
+      <text x="100" y="256" class="lbl-s">1ʳᵉ = VCCQ ?</text>
+      <text x="152" y="256" class="lbl-s">2ᵉ = CMD ?</text>
+      <text x="204" y="256" class="lbl-s">3ᵉ = DAT0 ?</text>
+      <text x="258" y="256" class="lbl-b" fill="var(--success, #22c55e)">4ᵉ = CLK ✓</text>
+      <line x1="138" y1="180" x2="138" y2="194" stroke="var(--destructive)" stroke-width="2" marker-end="url(#arrD)"/>
+      <text x="80" y="170" class="lbl-b" fill="var(--destructive)">⚠ PAS CELLE-CI (alim)</text>
+    </g>
+    <defs>
+      <marker id="arrD" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--destructive)"/></marker>
+    </defs>
+  </svg>
+  <p class="note" style="margin-top:10px">
+    En comptant les résistances de la rangée <b>depuis le coin de la puce</b> : la 1ʳᵉ est probablement de l'alimentation (<b>VCCQ — interdit d'y toucher</b>), puis CMD, DAT0, et <b>la 4ᵉ c'est CLK</b>.
+    Le court-circuit CLK ↔ cadre métallique est <b>sans danger</b> : c'est un signal que le bootrom lit au démarrage. Le seul risque est mécanique (dérapage → rayure).
+  </p>
+  <div class="warn">Les composants sont minuscules — plus petits que sur une Xbox 360 selon le vidéaste qui a documenté la méthode. Prends ton temps, éclaire bien, <b>photo au téléphone + zoom</b> pour identifier avant de toucher.</div>
+</div>
+
+<!-- ================= ÉTAPE 5 : COURT-CIRCUIT ================= -->
+<div class="step">
+  <h2><span class="badge">5</span>Le montage du court-circuit — trombone en L</h2>
+  <p class="note">Méthode solo validée : le trombone tient tout seul par ressort sur le cadre, ta main est libre pour le branchement.</p>
+  <svg viewBox="0 0 690 280">
+    <!-- rim -->
+    <rect x="15" y="15" width="660" height="250" rx="8" fill="none" stroke="var(--muted-foreground)" stroke-width="10" opacity="0.45"/>
+    <text x="30" y="45" class="lbl-b">cadre métallique = GND</text>
+    <!-- puce simplifiée -->
+    <rect x="470" y="80" width="130" height="130" fill="#1a1a1a" stroke="var(--foreground)"/>
+    <text x="495" y="150" class="lbl-s">MT8127</text>
+    <!-- resistances -->
+    <rect x="180" y="196" width="16" height="10" fill="var(--muted-foreground)"/>
+    <rect x="230" y="196" width="16" height="10" fill="var(--muted-foreground)"/>
+    <rect x="280" y="196" width="16" height="10" fill="var(--muted-foreground)"/>
+    <rect x="330" y="196" width="16" height="10" fill="var(--success, #22c55e)"/>
+    <text x="308" y="225" class="lbl-b" fill="var(--success, #22c55e)">CLK</text>
+    <!-- trombone en L -->
+    <path d="M 380 60 L 380 190 Q 380 201 369 201 L 300 201 Q 288 201 288 191 Q 288 180 300 180 L 345 180" fill="none" stroke="#c0c0c8" stroke-width="4" stroke-linecap="round"/>
+    <text x="390" y="70" class="lbl-b">trombone plié en L</text>
+    <text x="390" y="88" class="lbl-s">branche longue : accrochée par</text>
+    <text x="390" y="104" class="lbl-s">ressort sous le cadre (GND)</text>
+    <text x="390" y="120" class="lbl-s">pointe : posée sur CLK</text>
+    <circle cx="338" cy="200" r="14" fill="none" stroke="var(--success, #22c55e)" stroke-width="2"/>
+    <text x="250" y="255" class="lbl-b" fill="var(--success, #22c55e)">contact CLK ✓</text>
+  </svg>
+  <p class="note" style="margin-top:10px">
+    Variantes qui marchent aussi : pince à épiler (une pointe sur CLK, l'autre sur le cadre — <b>validée sur ce modèle exact</b>), attache de pain métallique, fil dénudé.
+    Mode 100 % solo « vieille école » : un fil relié au jack HDMI (lui aussi à la masse) d'un côté, tenu sur CLK de l'autre, le tout maintenu par une <b>pince à linge</b>.
+  </p>
+  <div class="tip"><b>Séquence exacte du branchement :</b> ① câble sur le stick (pas au PC) → ② script lancé dans WSL (<code class="k">Waiting for bootrom</code>) → ③ trombone en place → ④ <b>bout USB-A dans le PC en tenant le court-circuit</b> → ⑤ vérifie côté Windows → ⑥ le script te dit de retirer le trombone → tu retire, Entrée.</div>
+</div>
+
+<!-- ================= ÉTAPE 6 : LE VERDICT ================= -->
+<div class="step">
+  <h2><span class="badge">6</span>Le verdict — 3 issues possibles</h2>
+  <svg viewBox="0 0 690 210">
+    <g>
+      <rect x="10" y="20" width="215" height="160" rx="10" fill="var(--card)" stroke="var(--success, #22c55e)" stroke-width="2"/>
+      <text x="25" y="48" class="lbl-b" fill="var(--success, #22c55e)">✅ <tspan class="mono">0e8d:0003</tspan> MT6227</text>
+      <text x="25" y="72" class="lbl-s">bootrom accessible !</text>
+      <text x="25" y="94" class="lbl-s">Stick débloquable.</text>
+      <text x="25" y="118" class="lbl-s">On enchaîne : attach usbipd,</text>
+      <text x="25" y="136" class="lbl-s">le script flashe (~5-10 min),</text>
+      <text x="25" y="154" class="lbl-s">TWRP → Magisk → debloat.</text>
+      <rect x="238" y="20" width="215" height="160" rx="10" fill="var(--card)" stroke="var(--warning, #eab308)" stroke-width="2"/>
+      <text x="253" y="48" class="lbl-b" fill="var(--warning, #eab308)">↩ <tspan class="mono">0e8d:2000</tspan> Preloader</text>
+      <text x="253" y="72" class="lbl-s">ou « Serial protocol mismatch »</text>
+      <text x="253" y="94" class="lbl-s">Le court-circuit a glissé</text>
+      <text x="253" y="112" class="lbl-s">ou pas tenu assez longtemps.</text>
+      <text x="253" y="136" class="lbl-s">Normal — le vidéaste a mis</text>
+      <text x="253" y="154" class="lbl-s">4 essais. On débranche et on refait.</text>
+      <rect x="466" y="20" width="215" height="160" rx="10" fill="var(--card)" stroke="var(--destructive)" stroke-width="2"/>
+      <text x="481" y="48" class="lbl-b" fill="var(--destructive)">✖ Rien n'apparaît</text>
+      <text x="481" y="72" class="lbl-s">Matériel post-déc-2019 :</text>
+      <text x="481" y="90" class="lbl-s">bootrom verrouillé en usine.</text>
+      <text x="481" y="114" class="lbl-s">On remonte le stick — il</text>
+      <text x="481" y="132" class="lbl-s">boote normalement, aucun</text>
+      <text x="481" y="150" class="lbl-s">risque pris. Fin du chemin Amonet.</text>
+    </g>
+  </svg>
+  <p class="note" style="margin-top:8px">Vérification côté Windows (PowerShell) pendant que le trombone tient : <code class="k">&amp; "C:\Program Files\usbipd-win\usbipd.exe" list</code></p>
+  <div class="warn">Si ça stalle en cours de script : Ctrl+C, débranche, relance <code class="k">python3 modules/main.py</code>, re-court-circuite, rebranche. Le script efface le preloader <b>en premier</b> exprès pour qu'un blocage retombe en mode bootrom sans re-court-circuiter. En cas de pépin de boot plus tard : <code class="k">boot-fastboot.sh</code> / <code class="k">boot-recovery.sh</code> — le stick reste débrickable par construction.</div>
+</div>
+
+<!-- ================= RÉFÉRENCES ================= -->
+<div class="step">
+  <h2><span class="badge">📷</span>Références visuelles officielles (à garder ouvertes sur ton téléphone)</h2>
+  <p class="refs">
+    Mes schémas sont des reconstitutions fidèles depuis les guides écrits — pour la photo officielle annotée du point CLK et la vraie taille des composants :<br>
+    • <b>Photo du point CLK</b> : post #1 du thread XDA (pièce jointe de k4y0z/hwmod) — <a href="https://xdaforums.com/t/unlock-root-twrp-unbrick-fire-tv-stick-2nd-gen-tank.3907002/">xdaforums.com/t/…3907002</a><br>
+    • <b>Vidéo complète ouverture + root</b> (11 min, le démontage est en début) : <a href="https://www.youtube.com/watch?v=qkZD3-Zh5OA">« Opening Up And Rooting A 2nd Gen Fire TV Stick »</a><br>
+    • <b>Guide détaillé écrit</b> (FR disponible dans ton dossier) : <code class="k">E:\Tools\FireStick\docs\GUIDE-AMONET-tank.md</code>
+  </p>
+</div>
+
+</body>
+</html>
