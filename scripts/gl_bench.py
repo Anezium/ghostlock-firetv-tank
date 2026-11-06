@@ -38,6 +38,8 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from tank_builds import SUPPORTED_INCREMENTALS
+
 REPO = Path(__file__).resolve().parents[1]
 DEV_SCRIPTS = REPO / "scripts" / "gl"
 OUT = REPO / "analysis" / "gl-runs"
@@ -46,9 +48,8 @@ DEV = "/data/local/tmp/gl"
 BIN = f"{DEV}/bin"
 RUNS = f"{DEV}/runs"
 
-EXPECTED_INCREMENTAL = "288.6.8.8_user_688805020"
 EXPECTED_DEVICE = "tank"
-EXPECTED_KERNEL = "3.10.54"
+EXPECTED_KERNEL = "3.10.54+"
 
 ADB = os.environ.get("ADB", "adb")
 
@@ -174,9 +175,11 @@ def build_report(dev: Device) -> tuple[dict[str, str], dict[str, bool]]:
         or "denied",
     }
     checks = {
-        "incremental": values["incremental"] == EXPECTED_INCREMENTAL,
+        "incremental": values["incremental"] in SUPPORTED_INCREMENTALS,
         "device": values["device"] == EXPECTED_DEVICE,
-        "kernel": EXPECTED_KERNEL in values["kernel"],
+        "kernel": re.match(
+            rf"^Linux version {re.escape(EXPECTED_KERNEL)}(?:\s|$)", values["kernel"]
+        ) is not None,
     }
     id_out = dev.su("id").stdout.strip()
     values["root"] = id_out
@@ -189,7 +192,9 @@ def require_build(dev: Device) -> dict[str, str]:
     bad = [k for k, ok in checks.items() if not ok and k != "root"]
     if bad:
         raise BenchError(
-            "build guard failed: " + ", ".join(bad) + "\n" + json.dumps(values, indent=2)
+            "build guard failed: " + ", ".join(bad)
+            + "\nsupported builds: " + ", ".join(sorted(SUPPORTED_INCREMENTALS))
+            + "\n" + json.dumps(values, indent=2)
         )
     return values
 

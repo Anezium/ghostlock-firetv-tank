@@ -5,14 +5,14 @@ the boot image are transferred (a few MB, not the whole ~600 MB file).
 
 Outputs (default: firmware/, which is git-ignored):
 
-    boot-688805020.img        Android boot image
-    kernel-688805020.zimage   compressed kernel payload
-    kernel-688805020.raw      decompressed kernel: input for vmlinux-to-elf
-    ota-members.json          ZIP member list
-    ota-source.json           URL, kernel version and bytes actually read
+    boot-<build>.img         Android boot image
+    kernel-<build>.zimage    compressed kernel payload
+    kernel-<build>.raw       decompressed kernel: input for vmlinux-to-elf
+    ota-members-<build>.json ZIP member list
+    ota-source-<build>.json  URL, kernel version and bytes actually read
 
 Usage:
-    python scripts/fetch_boot.py [--dest firmware]
+    python scripts/fetch_boot.py [--build 688805020|688806320] [--dest firmware]
 
 Then rebuild the analysable ELF:
 
@@ -32,12 +32,9 @@ import zipfile
 import zlib
 from pathlib import Path
 
+from tank_builds import DEFAULT_BUILD, OTA_URLS
+
 REPO = Path(__file__).resolve().parents[1]
-URL = (
-    "https://d1s31zyz7dcc2d.cloudfront.net/2024/3/14/"
-    "c5752488-58a3-4fe0-9ebf-9e4c3cc7d8a8/"
-    "update-kindle-full_tank-288.6.8.8_user_688805020.bin"
-)
 MAX_BYTES = 64 * 1024 * 1024
 
 
@@ -119,45 +116,50 @@ def decompress_kernel(payload: bytes) -> tuple[bytes, str]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--build", choices=tuple(OTA_URLS), default=DEFAULT_BUILD,
+                        help=f"exact tank build (default: {DEFAULT_BUILD})")
     parser.add_argument("--dest", type=Path, default=REPO / "firmware",
                         help="output directory (default: firmware/)")
     args = parser.parse_args(argv)
+    build = args.build
+    url = OTA_URLS[build]
     out = args.dest
     out.mkdir(parents=True, exist_ok=True)
 
-    reader = RangeReader(URL)
+    reader = RangeReader(url)
     print(f"OTA bytes: {reader.size}", flush=True)
 
     with zipfile.ZipFile(reader) as archive:
         members = archive.namelist()
-        (out / "ota-members.json").write_text(json.dumps(members, indent=2), encoding="utf-8")
+        (out / f"ota-members-{build}.json").write_text(
+            json.dumps(members, indent=2), encoding="utf-8")
         targets = [name for name in members if name.endswith("boot.img")]
         if len(targets) != 1:
             raise SystemExit(f"expected one boot image, found {targets}")
         boot = archive.read(targets[0])
 
-    (out / "boot-688805020.img").write_bytes(boot)
+    (out / f"boot-{build}.img").write_bytes(boot)
     if boot[:8] != b"ANDROID!":
         raise SystemExit(f"unexpected boot header {boot[:16]!r}")
 
     kernel_size = struct.unpack_from("<I", boot, 8)[0]
     page_size = struct.unpack_from("<I", boot, 36)[0]
     kernel = boot[page_size:page_size + kernel_size]
-    (out / "kernel-688805020.zimage").write_bytes(kernel)
+    (out / f"kernel-{build}.zimage").write_bytes(kernel)
     print(f"boot bytes: {len(boot)}, kernel bytes: {len(kernel)}, page size: {page_size}",
           flush=True)
 
-    cursor = 0
     image, version = decompress_kernel(kernel)
-    (out / "kernel-688805020.raw").write_bytes(image)
+    (out / f"kernel-{build}.raw").write_bytes(image)
     print(f"EXACT KERNEL: {version}", flush=True)
     print(f"HTTP bytes read: {reader.transferred}", flush=True)
 
-    (out / "ota-source.json").write_text(
-        json.dumps({"url": URL, "version": version, "http_bytes": reader.transferred}, indent=2),
+    (out / f"ota-source-{build}.json").write_text(
+        json.dumps({"build": build, "url": url, "version": version,
+                    "http_bytes": reader.transferred}, indent=2),
         encoding="utf-8",
     )
-    print(f"wrote {out}/kernel-688805020.raw — now run vmlinux-to-elf", flush=True)
+    print(f"wrote {out}/kernel-{build}.raw — now run vmlinux-to-elf", flush=True)
     return 0
 
 

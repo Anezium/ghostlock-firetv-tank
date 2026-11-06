@@ -1,8 +1,11 @@
 # GhostLock — one-shot root for the Fire TV Stick 2 (tank)
 
 Build-guarded, re-playable, **one-shot** root for a stock Amazon Fire TV Stick
-2nd gen (AFTT, codename `tank`) running Fire OS 5.2.9.5 build
-`288.6.8.8_user_688805020` (kernel `3.10.54+`, ARM32, MT8127).
+2nd gen (AFTT, codename `tank`) running Fire OS 5.2.9.5 builds
+`288.6.8.8_user_688805020` or `288.6.8.8_user_688806320`
+(kernel `3.10.54+`, ARM32, MT8127).
+
+Everything runs over ADB: no case opening, test point or USB bootrom timing.
 
 No recovery, no unlocked bootloader, no Magisk, no persistent modification: the
 tool obtains a root shell for one command, and that is it. The exploit itself
@@ -29,7 +32,7 @@ one-shot session, no ~2 % chance of a panic per attempt.
 This project exists for one narrow case: you **refuse to open the device** (no
 case prying, no test point, no USB bootrom timing) and you only need one
 privileged session over ADB — debloat, disable OTA, back up app data — on a
-stick that is still on `288.6.8.8_user_688805020`.
+stick that is still on one of the two builds listed below.
 
 If that is you, keep reading. Otherwise close this page and go flash amonet.
 
@@ -38,13 +41,21 @@ If that is you, keep reading. Otherwise close this page and go flash amonet.
 | | |
 |---|---|
 | Device | Fire TV Stick 2nd gen — AFTT / `tank` |
-| Build | `288.6.8.8_user_688805020` **only** |
-| Kernel | `3.10.54+` (2024-03-13), ARM32, MT8127, no KASLR |
+| Builds | `288.6.8.8_user_688805020`, `288.6.8.8_user_688806320` **only** |
+| Kernel | `3.10.54+`, ARM32, MT8127, no KASLR |
 | Runs as | `shell` (uid 2000), like a stock device |
 | Guard | refuses any other device / build / kernel |
 
-An OTA removes the bug. If you want to keep the device exploitable, disable the
-OTA packages first (`scripts/debloat_tank.py`).
+`688805020` is the original maintainer-tested build. `688806320` was ported and
+reported working on hardware by [mhabou](https://github.com/mhabou) in
+[issue #1](https://github.com/Anezium/ghostlock-firetv-tank/issues/1). Its five
+kernel addresses have also been independently checked against the public Amazon
+OTA; the maintainer has not repeated the hardware reliability campaign on it.
+See [the verification record](docs/BUILD-688806320.md).
+
+Later OTAs may fix the bug or change kernel addresses. Do not bypass the guard;
+each additional build needs verification. To avoid an automatic update, see the
+OTA packages in `scripts/debloat_tank.py`.
 
 ## Quick start
 
@@ -53,6 +64,7 @@ Requirements: `adb`, USB debugging enabled on the stick, Python 3.9+.
 ```
 adb devices
 python scripts/gl_bench.py --serial <serial> doctor
+python scripts/gl_root.py  --serial <serial> --dry-run
 python scripts/gl_root.py  --serial <serial> --cmd "id; getenforce"
 ```
 
@@ -71,6 +83,10 @@ Permissive
 
 `--cmd` is one shell command line (chain with `;`). It runs in a root child of
 the exploit process, its output is captured, and nothing stays behind.
+
+The build is detected automatically; `--dry-run` checks compatibility without
+pushing or executing the payload. For launcher and Settings problems, see
+[Troubleshooting](docs/TROUBLESHOOTING.md).
 
 ## What it is good for
 
@@ -119,7 +135,8 @@ Per attempt: ~90–95 % on a warm system, ~80 % right after boot, ~2 % panic
 `gl_root.py` retries up to `--attempts` (default 3), reboots cleanly between
 attempts, and waits for the device to come back after a panic.
 
-Measured on the reference unit:
+Measured on the reference unit running **688805020** (these figures have not
+been measured on 688806320):
 
 | Campaign | Result |
 |---|---|
@@ -152,6 +169,10 @@ run logs (see `.gitignore`). To regenerate them locally:
 python scripts/fetch_boot.py
 # firmware/boot-688805020.img, kernel-688805020.zimage, kernel-688805020.raw
 
+# Optional: fetch the second supported build without replacing the first.
+python scripts/fetch_boot.py --build 688806320
+# firmware/boot-688806320.img, kernel-688806320.zimage, kernel-688806320.raw
+
 pip install vmlinux-to-elf        # or: uv tool install vmlinux-to-elf
 vmlinux-to-elf firmware/kernel-688805020.raw firmware/kernel-688805020.elf
 
@@ -164,6 +185,8 @@ few MB instead of the whole ~600 MB file; it decompresses the XZ kernel payload
 and checks the `3.10.54+` banner. `vmlinux-to-elf` turns that raw kernel into an
 analysable ELF (it also accepts the `.zimage` directly). The curated sources
 that the offset work relies on are committed in `source-subset/`.
+OTA member lists and provenance are saved as `ota-members-<build>.json` and
+`ota-source-<build>.json`, so fetching both builds preserves both records.
 
 `find_misc_fops.py` parses the ELF program headers (no hardcoded layout), so it
 works on a freshly rebuilt ELF too:
@@ -184,6 +207,21 @@ python scripts/find_misc_fops.py ashmem --kernel firmware/kernel-688805020.elf
 ## Credits
 
 GhostLock (CVE-2026-43499) — port, tooling and measurements for `tank`.
+
+Thanks to [Mohamed HABOU (mhabou)](https://github.com/mhabou) for the
+[688806320 port](https://github.com/mhabou/ghostlock-firetv-tank-688806320/tree/688806320),
+the hardware report, and the launcher/Settings troubleshooting notes. His fork
+also includes screenshots and a navigation demo.
+
+## Development checks
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+These tests exercise build rejection before payload execution and OTA selection
+without requiring ADB or downloading firmware. They do not establish hardware
+reliability.
 
 ## License
 

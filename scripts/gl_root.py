@@ -5,7 +5,7 @@
 
 The tool is a thin PC-side wrapper around probes/gl_exploit:
 
-* build guard: refuses to run on anything but 288.6.8.8_user_688805020
+* build guard: accepts only 288.6.8.8_user_688805020 or 288.6.8.8_user_688806320
   (product "tank", kernel 3.10.54+);
 * the payload always runs as the unprivileged `shell` user (uid 2000);
 * one attempt = one fresh payload process (fresh mm, fresh futex keys);
